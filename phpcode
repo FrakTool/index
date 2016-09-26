@@ -1,0 +1,133 @@
+*/Index.php para login/*
+<html>
+<head>
+<title>LOGIN</title>
+</head>
+
+<body>
+<h2>::LOGIN::</h2>
+<p>
+   <form action="vlog.php" method="post" name="formulario" id="formulario">
+      <p>login:<input type="text" name="login" id="login"> <br> </p>
+      <p>senha:<input type="password" name="senha" id="senha"> <br> </p>
+      <p><input type="submit" name="botao" id="botao" value="logar"> </p>
+   </form> 
+</p>
+  
+</body>
+</html>
+
+
+
+
+
+*/vlpog.php verificador de usuario e senha!/*
+
+<?php
+$usuario = $_POST["login"];
+$senha = $_POST["senha"];
+
+*/Abre a conexão com o mysql/*
+$con = mysql_connect("SEU_SERVIDOR","SEU_USUARIO","SUA_SENHA");
+mysql_select_db("SEU_BANCO_DE_DADOS");
+
+ */Aqui veificamos se o usuario e senha digitados no formulário existem e estão corretos/*
+$sql = mysql_query("SELECT * FROM SUA_TABELA_DE_DADOS WHERE log_nome='$usuario' and senha='$senha'");
+$qregistro = mysql_num_rows($sql);
+
+if($qregistro<1){
+   echo "Login ou senha errado(s)!!";
+} 
+else 
+{
+   */Apos verificado ele grava o usuario e senha no vetor $_session[]/*   
+   session_start();
+   $_SESSION['nome_usuario']=$usuario;
+   $_SESSION['senha_usuario']=$senha;
+   header("Location: home.php");
+}
+
+mysql_close($con)
+
+?>
+
+
+
+
+
+
+*/home.php - essa é a janela principal do "site" nela e em todas as outrazs que vocês queria bloquear vocês devem colocar a include a seguir!/*
+
+<?php
+include "valida_USUARIO.ink";
+?>
+
+
+<html>
+<head>
+   <title>:LOGADO!!!:</title>
+</head>
+
+<body>
+   PARABÉNS!!!! VOCÊ ESTA LOGADO!!!
+</body>
+</html>
+
+
+
+
+
+
+
+
+*/verifica_usuario.ink essa include ela verifica se o ususario esta logado o sistema verificando a session existente!/*
+
+<?php
+
+*/Esse sesion_start() inicia a sessão dando acesso ao vetor $_session[]/*
+session_start();
+
+*/coletamos os dados existentes no vetor.../*
+if(IsSet($_SESSION['nome_usuario']))
+   $nome_usuario=$_SESSION['nome_usuario'];
+if(IsSet($_SESSION['senha_usuario']))
+   $senha_usuario=$_SESSION['senha_usuario'];
+
+   */aqui vamos verificar se temos algo registrado/*
+   if(!(empty($nome_usuario) OR empty($senha_usuario)))
+   {
+      
+      */Abre a conexão com o mysql e seleaciona o banco/*
+      $con = mysql_connect("SEU_SERVIDOR","SEU_USUARIO","SUA_SENHA");
+      mysql_select_db("SEU_BANCO_DE_DADOS");
+
+      $sql=mysql_query("SELECT * FROM usuarios WHERE log_nome='$nome_usuario'");
+      $conta=mysql_num_rows($sql);
+      
+      if($conta>=1)
+      {
+         if($senha_usuario != mysql_result($sql,0,"senha"))
+         {
+            unset($_SESSION['nome_usuario']);
+            unset($_SESSION['senha_usuario']);
+            echo "você não efetuou o login!";
+            exit;
+         }
+      }
+      else
+      {
+            unset($_SESSION['nome_usuario']);
+            unset($_SESSION['senha_usuario']);
+            echo "você não efetuou o login!";
+            exit;
+      }
+   }
+   else
+   {
+   echo "você não efetuou o Login!";
+   exit;
+   }
+
+mysql_close($con);
+   
+?>
